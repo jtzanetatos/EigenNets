@@ -8,3 +8,4 @@ Created on Mon Jun 27 18:34:13 2022
 
 from ._dataloader import _image_dataset
 from ._mavecodd import MaVeCoDD
+from ._segmentation_models import segmentation_models
