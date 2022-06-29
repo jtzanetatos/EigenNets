@@ -35,7 +35,7 @@ train, label = _init_dataset()
 # Image resize
 target_size = (320, 320)
 # Batch size
-batch_size = 4
+batch_size = 2
 
 # Initialize model parameters - Segmentation models
 model_params = {"encoder_name" : "resnet18",
@@ -71,8 +71,8 @@ for i, (train_idx, test_idx) in enumerate(kf.split(X=train, y=label)):
     # Test dataloader
     valid_loader = DataLoader(test_dataset,
                               batch_size=batch_size,
-                              shuffle=False,
-                              num_workers=2)
+                              shuffle=True,
+                              num_workers=4)
     
     # Initialize model
     model = sm(model_params)
@@ -106,6 +106,6 @@ for i, (train_idx, test_idx) in enumerate(kf.split(X=train, y=label)):
     for i in range(epochs):
         print('\nEpoch: {}'.format(i))
         train_logs = train_epoch.run(train_loader)
-        valid_logs = valid_epoch.run(test_dataset)
+        valid_logs = valid_epoch.run(valid_loader)
         
 
