@@ -6,7 +6,7 @@ Created on Mon Jun 27 18:34:13 2022
 @author: iason
 """
 
-from eigennets import _image_dataset, MaVeCoDD
+from eigennets import MaVeCoDD_dataset, MaVeCoDD
 from eigennets import segmentation_models as sm
 from sklearn.model_selection import KFold
 from segmentation_models_pytorch.losses import DiceLoss
@@ -33,9 +33,9 @@ DEVICE = 'cuda'
 # Train & label samples
 train, label = _init_dataset()
 # Image resize
-target_size = (960, 960)
+target_size = (320, 320)
 # Batch size
-batch_size = 2
+batch_size = 4
 
 # Initialize model parameters - Segmentation models
 model_params = {"encoder_name" : "resnet18",
@@ -55,12 +55,12 @@ kf.get_n_splits(X=train, y=label)
 # K-Fold cross-validation iteration
 for i, (train_idx, test_idx) in enumerate(kf.split(X=train, y=label)):
     # Train dataset
-    train_dataset = _image_dataset(train=train[train_idx],
+    train_dataset = MaVeCoDD_dataset(train=train[train_idx],
                                    labels=label[train_idx],
                                    target_size=target_size)
     
     # Test dataset
-    test_dataset = _image_dataset(train=train[test_idx],
+    test_dataset = MaVeCoDD_dataset(train=train[test_idx],
                                    labels=label[test_idx],
                                    target_size=target_size)
     # Train dataloader
