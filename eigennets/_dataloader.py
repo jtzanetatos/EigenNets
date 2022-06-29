@@ -14,7 +14,7 @@ is required.
 
 from torch import is_tensor
 from torch.utils.data import Dataset
-from numpy import arange, array, where
+from numpy import arange, array, where, uint8
 from numpy import sum as npsum
 from PIL import Image
 from torchvision.transforms import Compose, ToTensor, Normalize
@@ -72,7 +72,10 @@ class MaVeCoDD_dataset(Dataset):
         # Convert label to binary mask
         label_img = array(label_img)
         
-        label_img = where(npsum(label_img, axis=2), 1, 0)
+        label_img = where(npsum(label_img, axis=2), 255, 0)
+        
+        # Convert back to PIL.Image for compatibility
+        label_img = Image.fromarray(uint8(label_img), 'L')
         
         # Apply transformations
         x = self.t_transforms(in_img)
