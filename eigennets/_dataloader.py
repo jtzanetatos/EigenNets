@@ -42,7 +42,7 @@ class MaVeCoDD_dataset(Dataset):
         self.t_transforms = t_transforms
         self.target_size = target_size
         self.indexes = arange(len(train))
-        self.l_transform = t_transforms
+        self.l_transform = l_transform
         
         
     def __len__(self):
@@ -72,7 +72,7 @@ class MaVeCoDD_dataset(Dataset):
         # Convert label to binary mask
         label_img = array(label_img)
         
-        label_img = npsum((label_img/3), axis=2)
+        label_img = npsum((label_img/3), axis=2) / 255
         
         # Convert back to PIL.Image for compatibility
         label_img = Image.fromarray(uint8(label_img), 'L')
