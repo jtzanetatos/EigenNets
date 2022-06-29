@@ -4,15 +4,22 @@
 Created on Sun Jun 19 20:48:24 2022
 
 @author: iason
+
+MaVeCoDD_dataset class file.
+
+The implementation of the 'MaVeCoDD_dataset' class can serve as a generic
+template for any vision/imaging purposes. It is assumed that minimal adaptation
+is required.
 """
 
 from torch import is_tensor
 from torch.utils.data import Dataset
-from numpy import arange
+from numpy import arange, array, where
+from numpy import sum as npsum
 from PIL import Image
 from torchvision.transforms import Compose, ToTensor, Normalize
 
-class _image_dataset(Dataset):
+class MaVeCoDD_dataset(Dataset):
     
     def __init__(self,
                  train: list,
@@ -35,7 +42,7 @@ class _image_dataset(Dataset):
         self.t_transforms = t_transforms
         self.target_size = target_size
         self.indexes = arange(len(train))
-        self.l_transform = t_transforms
+        self.l_transform = l_transform
         
         
     def __len__(self):
@@ -61,6 +68,11 @@ class _image_dataset(Dataset):
         if self.target_size is not None:
             in_img = in_img.resize(self.target_size, Image.LANCZOS)
             label_img = label_img.resize(self.target_size, Image.LANCZOS)
+        
+        # Convert label to binary mask
+        label_img = array(label_img)
+        
+        label_img = where(npsum(label_img, axis=2), 1, 0)
         
         # Apply transformations
         x = self.t_transforms(in_img)
