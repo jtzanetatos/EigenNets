@@ -7,25 +7,58 @@ Created on Tue Jun 28 17:15:20 2022
 """
 
 from segmentation_models_pytorch import (UnetPlusPlus, PSPNet, FPN,
-                                         DeepLabV3Plus)
+                                         DeepLabV3Plus, Unet, MAnet,
+                                         Linknet, PAN, DeepLabV3)
 from torch import save, load
 from torch.nn import Module, Sequential
+from warnings import warn
 from typing import Iterable
 
 def _forward(obj: object, x: Iterable):
     return obj.layers(x)
 
+def _set_network(obj: object):
+    
+    # Safeguard invalid options
+    if obj.network not in obj._avail_nets:
+        warn("Invalid option entered, defaulting to unet",
+             category=SyntaxWarning)
+        obj.network = 'unet'
+    
+    # Saveguard PSPNet
+    if obj.network == 'pspnet':
+        # TODO: Extract model params & remove unsuported params
+        pass
+    
+    # Set architecture
+    return obj._avail_nets[obj.network]
+
 class segmentation_models(Module):
     
     def __init__(self,
+                 network: str,
                  model_params: dict,
                  custom_train: bool=False,
                  layer: Sequential=None,
                  ):
         super(segmentation_models, self).__init__()
+        
+        self._avail_nets = {'unet' : Unet,
+                            'unetplusplus' : UnetPlusPlus,
+                            'manet' : MAnet,
+                            'linknet' : Linknet,
+                            'pspnet' : PSPNet,
+                            'fpn' : FPN,
+                            'pan' : PAN,
+                            'deeplabv3' : DeepLabV3,
+                            'deeplabv3p' : DeepLabV3Plus
+                            }
+        self.network = network
         self.model_params = model_params
         # Initialize parameters for the models
         self._init_params(model_params)
+        # Set desired architecture
+        self._base_model(_set_network(self))
         # Further experiment with architecture
         if custom_train:
             self._custom_train = custom_train
@@ -48,23 +81,6 @@ class segmentation_models(Module):
         for attr in attrs:
             setattr(self, attr, eval(f"self.model.{attr}"))
     
-    def unetplusplus(self):
-        # Initialize model
-        self._base_model(UnetPlusPlus)
-        self.model_name = 'UnetPlusPlus'
-    
-    def pspnet(self):
-        self._base_model(PSPNet)
-        self.model_name = 'PSPNet'
-        
-    def fpn(self):
-        self._base_model(FPN)
-        self.model_name = "FPN"
-        
-    def deeplabv3p(self):
-        self._base_model(DeepLabV3Plus)
-        self.model_name = 'Deeplabv3+'
-    
     def saveWeights(self):
         save(self.model.state_dict(), f"./pytorch_{self.model_name}_weights.pth")
         print("Weights saved successfuly.")
@@ -74,10 +90,11 @@ class segmentation_models(Module):
         print("Weights loaded successfuly.")
 
 if __name__ == "__main__":
+    network='pspnet'
     model_params = {"encoder_name" : "resnet34",
                     "encoder_depth" : 5,
                     "encoder_weights" : 'imagenet',
                     "decoder_use_batchnorm" : True,
                     }
-    model = segmentation_models(model_params)
-    model.unetplusplus()
+    model = segmentation_models(network,
+                                model_params)
